@@ -71,14 +71,14 @@ define(function(require) {
         var childrenDepth = this.depth + 1;
         width = (this.w / 2);
         height = (this.h / 2);
-        this.nodes.push(new this.constructor(this.x, this.y, width, height, childrenDepth, this.maxChildren, this.maxDepth));
-        this.nodes.push(new this.constructor(this.x + width, this.y, width, height, childrenDepth, this.maxChildren, this.maxDepth));
-        this.nodes.push(new this.constructor(this.x, this.y + height, width, height, childrenDepth, this.maxChildren, this.maxDepth));
-        this.nodes.push(new this.constructor(this.x + width, this.y + height, width, height, childrenDepth, this.maxChildren, this.maxDepth));
+        this.nodes.push(new this.constructor(this.x, this.y, width, height, childrenDepth, this.maxChildren, this.maxDepth, this.root));
+        this.nodes.push(new this.constructor(this.x + width, this.y, width, height, childrenDepth, this.maxChildren, this.maxDepth, this.root));
+        this.nodes.push(new this.constructor(this.x, this.y + height, width, height, childrenDepth, this.maxChildren, this.maxDepth, this.root));
+        this.nodes.push(new this.constructor(this.x + width, this.y + height, width, height, childrenDepth, this.maxChildren, this.maxDepth, this.root));
         oldChildren = this.items;
         this.items = [];
         for (var i = 0, l = oldChildren.length; i < l; i++) {
-            this.insert(oldChildren[i]);
+            this.root.insert(oldChildren[i]);
         }
     };
     /**
@@ -132,6 +132,17 @@ define(function(require) {
                 fn(this.BOTTOM_RIGHT);
             }
         }
+    };
+
+    QTNode.prototype.getNodes = function() {
+        var out = [this];
+        for(var i = 0, l = this.nodes.length; i < l; i++) {
+            this.nodes[i].getNodes().reduce(function(a, e){
+                a.push(e);
+                return a;
+            }, out);
+        }
+        return out;
     };
 
 
@@ -205,7 +216,10 @@ define(function(require) {
                 }
             }
             return [x,y,h,w];
-        }
+        };
+        self.getNodes = function() {
+            return self.root.getNodes();
+        };
     }
     QUAD.prototype = {
         opt: {
